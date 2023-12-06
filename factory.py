@@ -1,5 +1,5 @@
 import pygame
-from objects import Spout, Brick
+from objects import Spout, Brick, Employee
 
 # pygame setup
 pygame.init()
@@ -15,6 +15,10 @@ brick: [Brick] = []
 belt = pygame.Rect(130, 500, screen.get_width(), 100)
 money = 0
 score_board = pygame.Rect(screen.get_width()-300, 35, 0, 0)
+employees: [Employee] = []
+
+for i in range(3):
+    employees.append(Employee((i*200)+650, 475))
 
 # have "people" impact the value based on trait that has a multiplier
 # add upgrades that allow more powerful clicks and passive cube generation
@@ -29,6 +33,9 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if spout.is_clicked(event.pos):
                 spout.perform_action()
+            for i in employees:
+                if i.is_clicked(event.pos):
+                    i.perform_action()
     if frame == 60:
         brick.append(spout.spawn_brick())
         brick = [x for x in brick if x is not None]
@@ -44,6 +51,9 @@ while running:
             if i.move(100*dt) >= screen.get_width():
                 money += i.value
                 brick.remove(i)
+
+    for i in employees:
+        i.draw(screen)
 
     pygame.draw.rect(screen, "black", belt)
 
