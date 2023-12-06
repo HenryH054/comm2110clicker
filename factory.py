@@ -1,4 +1,5 @@
 import pygame
+from objects import Spout, Brick
 
 # pygame setup
 pygame.init()
@@ -6,8 +7,18 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 dt = 0
+frame = 0
+font = pygame.font.Font(None, 40)
 
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+spout = Spout(100, 100, 300, 200, (200, 200, 0), 'Click Me')
+brick: [Brick] = []
+belt = pygame.Rect(130, 500, screen.get_width(), 100)
+money = 0
+score_board = pygame.Rect(screen.get_width()-300, 35, 0, 0)
+
+# have "people" impact the value based on trait that has a multiplier
+# add upgrades that allow more powerful clicks and passive cube generation
+# add upgrades to people that allow altering of traits
 
 while running:
     # poll for events
@@ -15,21 +26,30 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if spout.is_clicked(event.pos):
+                spout.perform_action()
+    if frame == 60:
+        brick.append(spout.spawn_brick())
+        brick = [x for x in brick if x is not None]
+        frame = 0
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
+    screen.fill((50, 50, 50))
+    spout.draw(screen)
 
-    pygame.draw.circle(screen, "red", player_pos, 40)
+    if brick:
+        for i in brick:
+            i.draw(screen)
+            if i.move(100*dt) >= screen.get_width():
+                money += i.value
+                brick.remove(i)
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        player_pos.y -= 300 * dt
-    if keys[pygame.K_s]:
-        player_pos.y += 300 * dt
-    if keys[pygame.K_a]:
-        player_pos.x -= 300 * dt
-    if keys[pygame.K_d]:
-        player_pos.x += 300 * dt
+    pygame.draw.rect(screen, "black", belt)
+
+    text_surface = font.render(f"${money}", True, (255, 255, 255))
+    text_rect = text_surface.get_rect(center=score_board.center)
+    screen.blit(text_surface, text_rect)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
@@ -38,5 +58,6 @@ while running:
     # dt is delta time in seconds since last frame, used for framerate-
     # independent physics.
     dt = clock.tick(60) / 1000
+    frame += 1
 
 pygame.quit()
