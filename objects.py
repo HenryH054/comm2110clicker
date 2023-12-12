@@ -57,16 +57,13 @@ class Brick():
 
         return self.rect.left
 
+    def upgrade(self, employee: ["Employee"]):
+        for i in employee:
+            if i.rect.collidepoint(self.rect.center) and i.status:
+                self.value = round(self.value * i.multiplier)
+
 
 class Employee():
-    # adolescent - attention seeking
-    # bully - demeans and takes credit
-    # mild annoyance - just annoying
-    # independent self promoter - only does things if they get credit
-    # pushy play-boy make someone do a useless tak
-    # independent other - someone who is different
-    # abrasive incompetent harrasser - all around terrible and tends to do no work
-    # epic co-worker - buff everyone
     names = ["Eleanor", "Alexander", "Sophia", "Mason", "Olivia", "Liam", "Ava", "Jackson",
              "Isabella", "Lucas", "Mia", "Aiden", "Emma", "Carter", "Charlotte", "Logan", "Amelia",
              "Elijah", "Harper", "Caleb", "Aria", "Makayla", "Henry", "Abigail", "Owen", "Layla",
@@ -76,48 +73,50 @@ class Employee():
 
     debuffs = ["Adolescent", "Bully", "Mild Annoyance", "Independent Self Promoter", "Pushy Play-Boy",
                "Independent Other", "Abrasive Incompetent Harasser", "Epic Colleague"]
-    # "on/off task" - generate things
-    # display showing morale & task status
-    # click for credit
 
     def __init__(self, x, y):
         self.name = Employee.names[randint(0, 49)]
         self.debuff_id = randint(0, 7)
         self.debuff = Employee.debuffs[self.debuff_id]
         self.status = True
-        self.multiplier = randint(5, 50)
+        self.multiplier = randint(2, 5)
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255))
-        self.center = (x,y)
+        self.center = (x, y)
         self.size = randint(60, 100)
-        self.rect = pygame.Rect(x-self.size, y-self.size, self.size*2, self.size*2)
+        self.rect = pygame.Rect(x-self.size, y-self.size,
+                                self.size*2, self.size*2)
 
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, self.center, self.size)
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
-    
-    def perform_action(self):
-        print(f"You clicked {self.name} who is a {self.debuff}")
+
+    def perform_action(self, font, screen, score_board):
+        text_surface = font.render(
+            f"{self.name} is a {self.debuff} which has a x{self.multiplier} multiplier", True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=score_board.center)
+        return text_surface, text_rect
 
     def effect(self) -> (int, int):
         match self.debuff_id:
             case 0 | 2:
-                #if adolescent or mild annoyance nerf multiplier by random integer
-                return (0, randint(5,10) / 10)
+                # if adolescent or mild annoyance nerf multiplier by random integer
+                return (0, randint(5, 10) / 10)
             case 1 | 3 | 4 | 6:
-                #if bully randomally or pushy play boy or abrasive harasser or independent set status to false
-                return (1, randint(0,1))
+                # if bully randomally or pushy play boy or abrasive harasser or independent set status to false
+                return (1, randint(0, 1))
             case 5:
                 # if independent other nerf all employees by a little
-                return (0, randint(8,10) / 10)
+                return (0, randint(8, 10) / 10)
             case 7:
                 # epic employee which buffs everyone cause it's a game
-                return (2, randint(2,5))
-
+                return (2, randint(2, 5))
 
     def update_employees(employees: ["Employee"]):
         for i in employees:
+            i.status = True
+            i.multiplier = randint(2, 5)
             effect, value = i.effect()
             length = len(employees)
             match effect:

@@ -9,13 +9,18 @@ running = True
 dt = 0
 frame = 0
 font = pygame.font.Font(None, 40)
+font2 = pygame.font.Font(None, 20)
+
 
 spout = Spout(100, 100, 300, 200, (200, 200, 0), 'Click Me')
 brick: [Brick] = []
 belt = pygame.Rect(130, 500, screen.get_width(), 100)
 money = 0
 score_board = pygame.Rect(screen.get_width()-300, 35, 0, 0)
+employee_info = pygame.Rect(screen.get_width()-300, 60, 0, 0)
 employees: [Employee] = []
+employee_info_1 = None
+employee_info_2 = None
 
 for i in range(3):
     employees.append(Employee((i*200)+650, 475))
@@ -27,6 +32,7 @@ for i in range(3):
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
+    screen.fill((50, 50, 50))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -35,14 +41,20 @@ while running:
                 spout.perform_action()
             for i in employees:
                 if i.is_clicked(event.pos):
-                    i.perform_action()
+                    employee_info_1, employee_info_2 = i.perform_action(
+                        font2, screen, employee_info)
     if frame == 60:
         brick.append(spout.spawn_brick())
         brick = [x for x in brick if x is not None]
         frame = 0
 
+    if frame in [15, 30, 45, 60]:
+        Employee.update_employees(employees)
+        for i in brick:
+            i.upgrade(employees)
+
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill((50, 50, 50))
+
     spout.draw(screen)
 
     for i in employees:
@@ -60,6 +72,8 @@ while running:
     text_surface = font.render(f"${money}", True, (255, 255, 255))
     text_rect = text_surface.get_rect(center=score_board.center)
     screen.blit(text_surface, text_rect)
+    if employee_info_1 is not None:
+        screen.blit(employee_info_1, employee_info_2)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
