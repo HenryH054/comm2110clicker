@@ -28,9 +28,6 @@ upgrade_click = Upgrade(130, 625, 200, 75, "blue", "Click Power")
 for i in range(3):
     employees.append(Employee((i*200)+650, 475))
 
-# have "people" impact the value based on trait that has a multiplier
-# add upgrades that allow more powerful clicks and passive cube generation
-# add upgrades to people that allow altering of traits
 
 while running:
     # poll for events
