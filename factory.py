@@ -1,5 +1,5 @@
 import pygame
-from objects import Spout, Brick, Employee
+from objects import Spout, Brick, Employee, Upgrade
 
 # pygame setup
 pygame.init()
@@ -19,8 +19,11 @@ money = 0
 score_board = pygame.Rect(screen.get_width()-300, 35, 0, 0)
 employee_info = pygame.Rect(screen.get_width()-300, 60, 0, 0)
 employees: [Employee] = []
-employee_info_1 = None
-employee_info_2 = None
+ei1 = None
+ei2 = None
+ei3 = None
+ei4 = None
+upgrade_click = Upgrade(130, 625, 200, 75, "blue", "Click Power")
 
 for i in range(3):
     employees.append(Employee((i*200)+650, 475))
@@ -37,21 +40,24 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if upgrade_click.is_clicked(event.pos):
+                money = upgrade_click.perform_action(spout, money)
             if spout.is_clicked(event.pos):
                 spout.perform_action()
             for i in employees:
                 if i.is_clicked(event.pos):
-                    employee_info_1, employee_info_2 = i.perform_action(
+                    ei1, ei2, ei3, ei4 = i.perform_action(
                         font2, screen, employee_info)
-    if frame == 60:
+    if frame % 60 == 0:
         brick.append(spout.spawn_brick())
         brick = [x for x in brick if x is not None]
-        frame = 0
 
-    if frame in [15, 30, 45, 60]:
-        Employee.update_employees(employees)
+    if frame % 30 == 0:
         for i in brick:
             i.upgrade(employees)
+
+    if frame % 120 == 0:
+        Employee.update_employees(employees)
 
     # fill the screen with a color to wipe away anything from last frame
 
@@ -69,11 +75,14 @@ while running:
 
     pygame.draw.rect(screen, "black", belt)
 
+    upgrade_click.draw(screen)
+
     text_surface = font.render(f"${money}", True, (255, 255, 255))
     text_rect = text_surface.get_rect(center=score_board.center)
     screen.blit(text_surface, text_rect)
-    if employee_info_1 is not None:
-        screen.blit(employee_info_1, employee_info_2)
+    if ei1 is not None:
+        screen.blit(ei1, ei2)
+        screen.blit(ei3, ei4)
 
     # flip() the display to put your work on screen
     pygame.display.flip()

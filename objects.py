@@ -34,6 +34,34 @@ class Spout:
         return None
 
 
+class Upgrade():
+    def __init__(self, x, y, width, height, color, text) -> None:
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = color
+        self.text = text
+        self.font = pygame.font.Font(None, 20)
+        self.cost = 10000
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+        text_surface = self.font.render(self.text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        text_surface2 = self.font.render(str(self.cost), True, (255, 255, 255))
+        text_rect2 = text_surface2.get_rect(center = (self.rect.centerx, self.rect.centery+20))
+        screen.blit(text_surface, text_rect)
+        screen.blit(text_surface2, text_rect2)
+
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
+
+    def perform_action(self, spout: Spout, money):
+        if money >= self.cost:
+            money -= self.cost
+            spout.click_power = round(1.2 * spout.click_power)
+            self.cost = round(1.2 * self.cost)
+        return money
+
+
 class Brick():
     def __init__(self, value, xy) -> None:
         self.value = value
@@ -76,10 +104,10 @@ class Employee():
 
     def __init__(self, x, y):
         self.name = Employee.names[randint(0, 49)]
-        self.debuff_id = randint(0, 7)
+        self.debuff_id = randint(0, 6)
         self.debuff = Employee.debuffs[self.debuff_id]
         self.status = True
-        self.multiplier = randint(2, 5)
+        self.multiplier = 5
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255))
         self.center = (x, y)
         self.size = randint(60, 100)
@@ -96,7 +124,10 @@ class Employee():
         text_surface = font.render(
             f"{self.name} is a {self.debuff} which has a x{self.multiplier} multiplier", True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=score_board.center)
-        return text_surface, text_rect
+        text_surface2 = font.render(
+            f"Currenty they are working: {self.status}", True, (255, 255, 255))
+        text_rect2 = text_surface2.get_rect(center=(score_board.centerx, score_board.centery + 20))
+        return text_surface, text_rect, text_surface2, text_rect2
 
     def effect(self) -> (int, int):
         match self.debuff_id:
@@ -116,13 +147,13 @@ class Employee():
     def update_employees(employees: ["Employee"]):
         for i in employees:
             i.status = True
-            i.multiplier = randint(2, 5)
+            i.multiplier = 5
             effect, value = i.effect()
             length = len(employees)
             match effect:
                 case 0:
                     person = employees[randint(0, length-1)]
-                    person.multiplier = person.multiplier * value
+                    person.multiplier = round(person.multiplier * value)
                 case 1:
                     person = employees[randint(0, length-1)]
                     if effect == 1:
@@ -131,4 +162,4 @@ class Employee():
                         person.status = False
                 case 2:
                     for i in employees:
-                        i.multiplier = i.multiplier * value
+                        i.multiplier = round(i.multiplier * value)
