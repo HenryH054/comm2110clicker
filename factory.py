@@ -45,15 +45,15 @@ while running:
     screen.fill((50, 50, 50))
     spout.draw(screen)
 
+    for i in employees:
+        i.draw(screen)
+
     if brick:
         for i in brick:
             i.draw(screen)
             if i.move(100*dt) >= screen.get_width():
                 money += i.value
                 brick.remove(i)
-
-    for i in employees:
-        i.draw(screen)
 
     pygame.draw.rect(screen, "black", belt)
 

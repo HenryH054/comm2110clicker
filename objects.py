@@ -85,6 +85,7 @@ class Employee():
         self.debuff_id = randint(0, 7)
         self.debuff = Employee.debuffs[self.debuff_id]
         self.status = True
+        self.multiplier = randint(5, 50)
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255))
         self.center = (x,y)
         self.size = randint(60, 100)
@@ -100,4 +101,35 @@ class Employee():
         print(f"You clicked {self.name} who is a {self.debuff}")
 
     def effect(self) -> (int, int):
-        pass
+        match self.debuff_id:
+            case 0 | 2:
+                #if adolescent or mild annoyance nerf multiplier by random integer
+                return (0, randint(5,10) / 10)
+            case 1 | 3 | 4 | 6:
+                #if bully randomally or pushy play boy or abrasive harasser or independent set status to false
+                return (1, randint(0,1))
+            case 5:
+                # if independent other nerf all employees by a little
+                return (0, randint(8,10) / 10)
+            case 7:
+                # epic employee which buffs everyone cause it's a game
+                return (2, randint(2,5))
+
+
+    def update_employees(employees: ["Employee"]):
+        for i in employees:
+            effect, value = i.effect()
+            length = len(employees)
+            match effect:
+                case 0:
+                    person = employees[randint(0, length-1)]
+                    person.multiplier = person.multiplier * value
+                case 1:
+                    person = employees[randint(0, length-1)]
+                    if effect == 1:
+                        person.status = True
+                    else:
+                        person.status = False
+                case 2:
+                    for i in employees:
+                        i.multiplier = i.multiplier * value
